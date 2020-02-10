@@ -38,7 +38,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
-public class CoverPump extends CoverBehavior implements CoverWithUI, ITickable, IControllable {
+public class CoverPump extends AdaptiveCoverBehaviors implements CoverWithUI, IControllable {
 
     public final int tier;
     public final int maxFluidTransferRate;
@@ -75,14 +75,17 @@ public class CoverPump extends CoverBehavior implements CoverWithUI, ITickable, 
     }
 
     @Override
-    public void update() {
+    protected boolean innerUpdate() {
         long timer = coverHolder.getTimer();
+        int totalTransfered = 0;
         if (isWorkingAllowed && fluidLeftToTransferLastSecond > 0) {
-            this.fluidLeftToTransferLastSecond -= doTransferFluids(fluidLeftToTransferLastSecond);
+            totalTransfered = doTransferFluids(fluidLeftToTransferLastSecond);
+            this.fluidLeftToTransferLastSecond -= totalTransfered;
         }
         if (timer % 20 == 0) {
             this.fluidLeftToTransferLastSecond = transferRate;
         }
+        return totalTransfered != 0;
     }
 
     protected int doTransferFluids(int transferLimit) {

@@ -37,7 +37,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class CoverConveyor extends CoverBehavior implements CoverWithUI, ITickable, IControllable {
+public class CoverConveyor extends AdaptiveCoverBehaviors implements CoverWithUI, IControllable {
 
     public final int tier;
     public final int maxItemTransferRate;
@@ -78,20 +78,22 @@ public class CoverConveyor extends CoverBehavior implements CoverWithUI, ITickab
     }
 
     @Override
-    public void update() {
+    protected boolean innerUpdate() {
         long timer = coverHolder.getTimer();
-        if (timer % 5 == 0 && isWorkingAllowed && itemsLeftToTransferLastSecond > 0) {
+        int totalTransferred = 0;
+        if (isWorkingAllowed && itemsLeftToTransferLastSecond > 0) {
             TileEntity tileEntity = coverHolder.getWorld().getTileEntity(coverHolder.getPos().offset(attachedSide));
             IItemHandler itemHandler = tileEntity == null ? null : tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, attachedSide.getOpposite());
             IItemHandler myItemHandler = coverHolder.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, attachedSide);
             if (itemHandler != null && myItemHandler != null) {
-                int totalTransferred = doTransferItems(itemHandler, myItemHandler, itemsLeftToTransferLastSecond);
+                totalTransferred = doTransferItems(itemHandler, myItemHandler, itemsLeftToTransferLastSecond);
                 this.itemsLeftToTransferLastSecond -= totalTransferred;
             }
         }
         if (timer % 20 == 0) {
             this.itemsLeftToTransferLastSecond = transferRate;
         }
+        return totalTransferred != 0;
     }
 
     protected int doTransferItems(IItemHandler itemHandler, IItemHandler myItemHandler, int maxTransferAmount) {

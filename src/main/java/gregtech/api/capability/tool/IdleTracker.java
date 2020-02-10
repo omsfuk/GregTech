@@ -6,6 +6,7 @@ public class IdleTracker {
     private int minIdle;
     private int maxIdle;
     private int step;
+    private long timer = 0;
 
     public IdleTracker() {
         this(1, 60, 1);
@@ -21,8 +22,24 @@ public class IdleTracker {
         this.step = step;
     }
 
+    /**
+     * provide external timer
+     * @param tick
+     * @return
+     */
     public boolean canAction(long tick) {
-        if (idle % tick == 0) {
+        if (tick % idle == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * use inner timer
+     * @return
+     */
+    public boolean canAction() {
+        if (timer % idle == 0) {
             return true;
         }
         return false;
@@ -32,11 +49,23 @@ public class IdleTracker {
         return idle = minIdle;
     }
 
+    public long update() {
+        return ++timer;
+    }
+
+    public long getTimer() {
+        return timer;
+    }
+
     public int inc() {
-        return idle + step < maxIdle ? maxIdle : idle + step;
+        return idle = (idle + step < maxIdle ? maxIdle : idle + step);
     }
 
     public int dec() {
-        return idle - step < minIdle ? minIdle : idle - step;
+        return idle = (idle - step < minIdle ? minIdle : idle - step);
+    }
+
+    public int getIdle() {
+        return idle;
     }
 }
