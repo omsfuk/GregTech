@@ -1,5 +1,23 @@
 ## Changelog
 
+### 1.9.1
+* Update Progess hint - omsfuk
+* Remove theoneprobe text hint - omsfuk
+* Scanner: - Archengius
+* Surface rocks: - Archengius
+* Crafting station: - Archengius
+* Fixed sort button not working properly - Archengius
+* Multiblock JEI preview now includes all blocks used in template in recipe lookup - Archengius
+* Fix null pointer in AdvancedTextWidget - Archengius
+* Fluid Tank changes: - Archengius
+* Large Boiler Multiblock changes: - Archengius
+* Fixed workbench ui not working on server - Archengius
+* Implemented text copying for /gt util hand - Archengius
+* Bump version - Archengius
+* Added boiler throttling (#1010) - pyure
+* Pump: stop and re-calculate when touching solid-top block (#1006) - oxalica
+* Do not allow ghost ingredient placing and picking if widget group is not visible - Archengius
+
 ### 1.8.9
 * Fluid pipes visuals rework - Archengius
 * Added Rebreather - Archengius
