@@ -4,6 +4,7 @@ import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IMultipleTankHandler;
 import gregtech.api.capability.IWorkable;
+import gregtech.api.capability.tool.IdleTracker;
 import gregtech.api.metatileentity.MTETrait;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.recipes.Recipe;
@@ -36,6 +37,8 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable 
     protected FluidStack[] lastFluidInputs;
     protected Recipe previousRecipe;
     protected boolean allowOverclocking = true;
+
+    protected IdleTracker idle = new IdleTracker(1, 60, 5);
 
     protected int progressTime;
     protected int maxProgressTime;
@@ -108,7 +111,9 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable 
                     updateRecipeProgress();
                 }
                 if (progressTime == 0) {
-                    trySearchNewRecipe();
+                    if (idle.canAction(getMetaTileEntity().getTimer())) {
+                        trySearchNewRecipe();
+                    }
                 }
             }
             if (wasActiveAndNeedsUpdate) {
@@ -160,6 +165,9 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable 
         }
         if (currentRecipe != null && setupAndConsumeRecipeInputs(currentRecipe)) {
             setupRecipe(currentRecipe);
+            idle.reset();
+        } else {
+            idle.inc();
         }
     }
 
