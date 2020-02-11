@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 public class AdvancedTextWidget extends Widget {
     protected int maxWidthLimit;
 
-    private ClientSideField<WrapScreen> wrapScreen = new ClientSideField<>(WrapScreen::new);
+    private ClientSideField<WrapScreen> wrapScreen = null;
+
     protected Consumer<List<ITextComponent>> textSupplier;
     protected BiConsumer<String, ClickData> clickHandler;
     private List<ITextComponent> displayText = new ArrayList<>();
@@ -41,6 +42,14 @@ public class AdvancedTextWidget extends Widget {
         super(new Position(xPosition, yPosition), Size.ZERO);
         this.textSupplier = text;
         this.color = color;
+        if (isClientSide()) {
+            initWrapScreen();
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void initWrapScreen() {
+        wrapScreen = new ClientSideField<>(WrapScreen::new);
     }
 
     public static ITextComponent withButton(ITextComponent textComponent, String componentData) {
@@ -236,8 +245,8 @@ public class AdvancedTextWidget extends Widget {
      * Used to call mc-related chat component handling code,
      * for example component hover rendering and default click handling
      */
-    @SideOnly(Side.CLIENT)
     private static class WrapScreen extends GuiScreen {
+        
         @Override
         public void handleComponentHover(ITextComponent component, int x, int y) {
             super.handleComponentHover(component, x, y);
