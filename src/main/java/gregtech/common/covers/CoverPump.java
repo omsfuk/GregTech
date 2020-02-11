@@ -75,17 +75,20 @@ public class CoverPump extends AdaptiveCoverBehaviors implements CoverWithUI, IC
     }
 
     @Override
-    protected boolean innerUpdate() {
-        long timer = coverHolder.getTimer();
+    protected boolean adaptiveUpdate() {
         int totalTransfered = 0;
         if (isWorkingAllowed && fluidLeftToTransferLastSecond > 0) {
             totalTransfered = doTransferFluids(fluidLeftToTransferLastSecond);
             this.fluidLeftToTransferLastSecond -= totalTransfered;
         }
-        if (timer % 20 == 0) {
+        return totalTransfered != 0;
+    }
+
+    @Override
+    protected void perTickUpdate() {
+        if (coverHolder.getTimer() % 20 == 0) {
             this.fluidLeftToTransferLastSecond = transferRate;
         }
-        return totalTransfered != 0;
     }
 
     protected int doTransferFluids(int transferLimit) {

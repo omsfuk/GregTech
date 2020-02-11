@@ -4,6 +4,7 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
 import gregtech.api.capability.impl.FluidTankList;
+import gregtech.api.capability.tool.IdleTracker;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.ModularUI.Builder;
@@ -37,6 +38,7 @@ public class MetaTileEntityFluidHatch extends MetaTileEntityMultiblockPart imple
     private static final int INITIAL_INVENTORY_SIZE = 8000;
     private ItemStackHandler containerInventory;
     private boolean isExportHatch;
+    private IdleTracker idle = new IdleTracker(20, 60, 5);
 
     public MetaTileEntityFluidHatch(ResourceLocation metaTileEntityId, int tier, boolean isExportHatch) {
         super(metaTileEntityId, tier);
@@ -72,13 +74,21 @@ public class MetaTileEntityFluidHatch extends MetaTileEntityMultiblockPart imple
     @Override
     public void update() {
         super.update();
-        if (!getWorld().isRemote) {
+        if (!getWorld().isRemote && idle.canAction(getTimer())) {
             if (isExportHatch) {
                 fillContainerFromInternalTank(containerInventory, containerInventory, 0, 1);
-                pushFluidsIntoNearbyHandlers(getFrontFacing());
+                if (pushFluidsIntoNearbyHandlers(getFrontFacing()) == 0) {
+                    idle.inc();
+                } else {
+                    idle.dec();
+                }
             } else {
                 fillInternalTankFromFluidContainer(containerInventory, containerInventory, 0, 1);
-                pullFluidsFromNearbyHandlers(getFrontFacing());
+                if (pullFluidsFromNearbyHandlers(getFrontFacing()) == 0) {
+                    idle.inc();
+                } else {
+                    idle.dec();
+                }
             }
         }
     }

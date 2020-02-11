@@ -3,6 +3,7 @@ package gregtech.common.metatileentities.electric.multiblockpart;
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
+import gregtech.api.capability.tool.IdleTracker;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.ModularUI.Builder;
@@ -29,6 +30,7 @@ import java.util.List;
 public class MetaTileEntityItemBus extends MetaTileEntityMultiblockPart implements IMultiblockAbilityPart<IItemHandlerModifiable> {
 
     private static final int[] INVENTORY_SIZES = {1, 4, 9, 16, 25, 36, 49};
+    private IdleTracker idle = new IdleTracker(20, 60, 5);
     private final boolean isExportHatch;
 
     public MetaTileEntityItemBus(ResourceLocation metaTileEntityId, int tier, boolean isExportHatch) {
@@ -45,11 +47,19 @@ public class MetaTileEntityItemBus extends MetaTileEntityMultiblockPart implemen
     @Override
     public void update() {
         super.update();
-        if (!getWorld().isRemote && getTimer() % 5 == 0) {
+        if (!getWorld().isRemote && idle.canAction(getTimer())) {
             if (isExportHatch) {
-                pushItemsIntoNearbyHandlers(getFrontFacing());
+                if (pushItemsIntoNearbyHandlers(getFrontFacing()) == 0) {
+                    idle.inc();
+                } else {
+                    idle.dec();
+                }
             } else {
-                pullItemsFromNearbyHandlers(getFrontFacing());
+                if (pullItemsFromNearbyHandlers(getFrontFacing()) == 0) {
+                    idle.inc();
+                } else {
+                    idle.dec();
+                }
             }
         }
     }

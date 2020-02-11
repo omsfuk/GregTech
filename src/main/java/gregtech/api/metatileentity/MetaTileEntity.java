@@ -857,7 +857,8 @@ public abstract class MetaTileEntity implements ICoverable {
         return total;
     }
 
-    public void pullFluidsFromNearbyHandlers(EnumFacing... allowedFaces) {
+    public int pullFluidsFromNearbyHandlers(EnumFacing... allowedFaces) {
+        int total = 0;
         PooledMutableBlockPos blockPos = PooledMutableBlockPos.retain();
         for (EnumFacing nearbyFacing : allowedFaces) {
             blockPos.setPos(getPos()).move(nearbyFacing);
@@ -871,9 +872,10 @@ public abstract class MetaTileEntity implements ICoverable {
             if (fluidHandler == null || myFluidHandler == null) {
                 continue;
             }
-            CoverPump.moveHandlerFluids(fluidHandler, myFluidHandler, Integer.MAX_VALUE, fluid -> true);
+            total = CoverPump.moveHandlerFluids(fluidHandler, myFluidHandler, Integer.MAX_VALUE, fluid -> true);
         }
         blockPos.release();
+        return total;
     }
 
     public int pushItemsIntoNearbyHandlers(EnumFacing... allowedFaces) {
@@ -897,8 +899,9 @@ public abstract class MetaTileEntity implements ICoverable {
         return total;
     }
 
-    public void pullItemsFromNearbyHandlers(EnumFacing... allowedFaces) {
+    public int pullItemsFromNearbyHandlers(EnumFacing... allowedFaces) {
         PooledMutableBlockPos blockPos = PooledMutableBlockPos.retain();
+        int total = 0;
         for (EnumFacing nearbyFacing : allowedFaces) {
             blockPos.setPos(getPos()).move(nearbyFacing);
             TileEntity tileEntity = getWorld().getTileEntity(blockPos);
@@ -911,9 +914,10 @@ public abstract class MetaTileEntity implements ICoverable {
             if (itemHandler == null) {
                 continue;
             }
-            moveInventoryItems(itemHandler, myItemHandler);
+            total = moveInventoryItems(itemHandler, myItemHandler);
         }
         blockPos.release();
+        return total;
     }
 
     protected static int moveInventoryItems(IItemHandler sourceInventory, IItemHandler targetInventory) {

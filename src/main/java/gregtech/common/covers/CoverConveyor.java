@@ -78,8 +78,7 @@ public class CoverConveyor extends AdaptiveCoverBehaviors implements CoverWithUI
     }
 
     @Override
-    protected boolean innerUpdate() {
-        long timer = coverHolder.getTimer();
+    protected boolean adaptiveUpdate() {
         int totalTransferred = 0;
         if (isWorkingAllowed && itemsLeftToTransferLastSecond > 0) {
             TileEntity tileEntity = coverHolder.getWorld().getTileEntity(coverHolder.getPos().offset(attachedSide));
@@ -90,10 +89,15 @@ public class CoverConveyor extends AdaptiveCoverBehaviors implements CoverWithUI
                 this.itemsLeftToTransferLastSecond -= totalTransferred;
             }
         }
-        if (timer % 20 == 0) {
+
+        return totalTransferred != 0;
+    }
+
+    @Override
+    protected void perTickUpdate() {
+        if (coverHolder.getTimer() % 20 == 0) {
             this.itemsLeftToTransferLastSecond = transferRate;
         }
-        return totalTransferred != 0;
     }
 
     protected int doTransferItems(IItemHandler itemHandler, IItemHandler myItemHandler, int maxTransferAmount) {

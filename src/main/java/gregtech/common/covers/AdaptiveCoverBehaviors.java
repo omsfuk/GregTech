@@ -17,8 +17,9 @@ public abstract class AdaptiveCoverBehaviors extends CoverBehavior implements IT
     @Override
     public void update() {
         idle.update();
+        perTickUpdate();
         if (idle.canAction()) {
-            if (innerUpdate()) {
+            if (adaptiveUpdate()) {
                 idle.dec();
             } else {
                 idle.inc();
@@ -26,5 +27,7 @@ public abstract class AdaptiveCoverBehaviors extends CoverBehavior implements IT
         }
     }
 
-    protected abstract boolean innerUpdate();
+    protected abstract boolean adaptiveUpdate();
+
+    protected abstract void perTickUpdate();
 }
