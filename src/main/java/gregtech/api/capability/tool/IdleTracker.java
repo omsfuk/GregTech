@@ -58,7 +58,7 @@ public class IdleTracker {
     }
 
     public int inc() {
-        return idle = (idle + step < maxIdle ? maxIdle : idle + step);
+        return idle = (idle + step > maxIdle ? maxIdle : idle + step);
     }
 
     public int dec() {

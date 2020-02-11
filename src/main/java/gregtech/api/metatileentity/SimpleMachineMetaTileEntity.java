@@ -8,6 +8,7 @@ import gregtech.api.capability.impl.EnergyContainerHandler;
 import gregtech.api.capability.impl.FluidHandlerProxy;
 import gregtech.api.capability.impl.FluidTankList;
 import gregtech.api.capability.impl.ItemHandlerProxy;
+import gregtech.api.capability.tool.IdleTracker;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.widgets.DischargerSlotWidget;
@@ -45,6 +46,8 @@ public class SimpleMachineMetaTileEntity extends WorkableTieredMetaTileEntity {
     private boolean autoOutputItems;
     private boolean autoOutputFluids;
     private boolean allowInputFromOutputSide;
+
+    private IdleTracker idle = new IdleTracker(20, 60, 5);
 
     protected IItemHandler outputItemInventory;
     protected IFluidHandler outputFluidInventory;
@@ -115,14 +118,23 @@ public class SimpleMachineMetaTileEntity extends WorkableTieredMetaTileEntity {
     public void update() {
         super.update();
         if (!getWorld().isRemote) {
+            idle.update();
             ((EnergyContainerHandler) this.energyContainer).dischargeOrRechargeEnergyContainers(chargerInventory, 0);
-            if (getTimer() % 5 == 0) {
+            if (idle.canAction(getTimer())) {
                 EnumFacing outputFacing = getOutputFacing();
                 if (autoOutputFluids) {
-                    pushFluidsIntoNearbyHandlers(outputFacing);
+                    if (pushFluidsIntoNearbyHandlers(outputFacing) > 0) {
+                        idle.dec();
+                    } else {
+                        idle.inc();
+                    }
                 }
                 if (autoOutputItems) {
-                    pushItemsIntoNearbyHandlers(outputFacing);
+                    if (pushItemsIntoNearbyHandlers(outputFacing) > 0) {
+                        idle.dec();
+                    } else {
+                        idle.inc();
+                    }
                 }
             }
         }

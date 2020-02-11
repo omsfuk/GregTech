@@ -836,8 +836,9 @@ public abstract class MetaTileEntity implements ICoverable {
         return false;
     }
 
-    public void pushFluidsIntoNearbyHandlers(EnumFacing... allowedFaces) {
+    public int pushFluidsIntoNearbyHandlers(EnumFacing... allowedFaces) {
         PooledMutableBlockPos blockPos = PooledMutableBlockPos.retain();
+        int total = 0;
         for (EnumFacing nearbyFacing : allowedFaces) {
             blockPos.setPos(getPos()).move(nearbyFacing);
             TileEntity tileEntity = getWorld().getTileEntity(blockPos);
@@ -850,9 +851,10 @@ public abstract class MetaTileEntity implements ICoverable {
             if (fluidHandler == null || myFluidHandler == null) {
                 continue;
             }
-            CoverPump.moveHandlerFluids(myFluidHandler, fluidHandler, Integer.MAX_VALUE, fluid -> true);
+            total = CoverPump.moveHandlerFluids(myFluidHandler, fluidHandler, Integer.MAX_VALUE, fluid -> true);
         }
         blockPos.release();
+        return total;
     }
 
     public void pullFluidsFromNearbyHandlers(EnumFacing... allowedFaces) {
@@ -874,7 +876,8 @@ public abstract class MetaTileEntity implements ICoverable {
         blockPos.release();
     }
 
-    public void pushItemsIntoNearbyHandlers(EnumFacing... allowedFaces) {
+    public int pushItemsIntoNearbyHandlers(EnumFacing... allowedFaces) {
+        int total = 0;
         PooledMutableBlockPos blockPos = PooledMutableBlockPos.retain();
         for (EnumFacing nearbyFacing : allowedFaces) {
             blockPos.setPos(getPos()).move(nearbyFacing);
@@ -888,9 +891,10 @@ public abstract class MetaTileEntity implements ICoverable {
             if (itemHandler == null) {
                 continue;
             }
-            moveInventoryItems(myItemHandler, itemHandler);
+            total = moveInventoryItems(myItemHandler, itemHandler);
         }
         blockPos.release();
+        return total;
     }
 
     public void pullItemsFromNearbyHandlers(EnumFacing... allowedFaces) {
@@ -912,7 +916,8 @@ public abstract class MetaTileEntity implements ICoverable {
         blockPos.release();
     }
 
-    protected static void moveInventoryItems(IItemHandler sourceInventory, IItemHandler targetInventory) {
+    protected static int moveInventoryItems(IItemHandler sourceInventory, IItemHandler targetInventory) {
+        int total = 0;
         for (int srcIndex = 0; srcIndex < sourceInventory.getSlots(); srcIndex++) {
             ItemStack sourceStack = sourceInventory.extractItem(srcIndex, Integer.MAX_VALUE, true);
             if (sourceStack.isEmpty()) {
@@ -924,7 +929,9 @@ public abstract class MetaTileEntity implements ICoverable {
                 sourceStack = sourceInventory.extractItem(srcIndex, amountToInsert, false);
                 ItemHandlerHelper.insertItemStacked(targetInventory, sourceStack, false);
             }
+            total += amountToInsert;
         }
+        return total;
     }
 
     public static boolean addItemsToItemHandler(IItemHandler handler, boolean simulate, List<ItemStack> items) {

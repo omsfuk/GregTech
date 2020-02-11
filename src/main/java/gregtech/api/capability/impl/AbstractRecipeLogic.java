@@ -112,6 +112,7 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable 
                 }
                 if (progressTime == 0) {
                     if (idle.canAction(getMetaTileEntity().getTimer())) {
+                        System.out.println(idle.getIdle());
                         trySearchNewRecipe();
                     }
                 }
