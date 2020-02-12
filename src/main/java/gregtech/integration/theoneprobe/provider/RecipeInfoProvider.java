@@ -5,7 +5,6 @@ import gregtech.api.capability.impl.AbstractRecipeLogic;
 import mcjty.theoneprobe.api.ElementAlignment;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.NumberFormat;
-import mcjty.theoneprobe.api.TextStyleClass;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -15,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class RecipeInfoProvider extends CapabilityInfoProvider<AbstractRecipeLogic> {
+
+    private static Method getMaxVoltage = ObfuscationReflectionHelper.findMethod(AbstractRecipeLogic.class, "getMaxVoltage", long.class);
 
     @Override
     public String getID() {
@@ -30,7 +31,6 @@ public class RecipeInfoProvider extends CapabilityInfoProvider<AbstractRecipeLog
     protected void addProbeInfo(AbstractRecipeLogic capability, IProbeInfo probeInfo, TileEntity tileEntity, EnumFacing sideHit) {
         if (capability != null && capability.getRecipeEUt() > 0) {
             IProbeInfo horizontalPane = probeInfo.horizontal(probeInfo.defaultLayoutStyle().alignment(ElementAlignment.ALIGN_CENTER));
-            Method getMaxVoltage = ObfuscationReflectionHelper.findMethod(AbstractRecipeLogic.class, "getMaxVoltage", long.class);
             long maxVoltage;
             try {
                 maxVoltage = (long) getMaxVoltage.invoke(capability);
